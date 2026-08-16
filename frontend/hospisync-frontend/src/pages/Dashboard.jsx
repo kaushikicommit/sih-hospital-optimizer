@@ -9,8 +9,8 @@ const FALLBACK_WARDS = [
   { ward: "General", occupancy: 78, risk: "moderate" },
   { ward: "ICU", occupancy: 92, risk: "high" },
   { ward: "Maternity", occupancy: 54, risk: "low" },
-  { ward: "Pediatrics", occupancy: 61, risk: "low" },
-  { ward: "Orthopedics", occupancy: 85, risk: "moderate" },
+  { ward: "Pediatric", occupancy: 61, risk: "low" },
+  { ward: "Surgery", occupancy: 85, risk: "moderate" },
 ];
 
 function useFetch(url, fallback) {
@@ -62,34 +62,10 @@ function riskTone(risk) {
 }
 
 export default function Dashboard() {
-  const { data: rawStats, isLive: statsLive } = useFetch(`${API_BASE}/dashboard`, null);
+  const { data: stats, isLive: statsLive } = useFetch(`${API_BASE}/dashboard`, FALLBACK_STATS);
+  const { data: wardsRaw, isLive: wardsLive } = useFetch(`${AI_BASE}/predict/all-wards`, FALLBACK_WARDS);
 
-  // Backend sends a nested shape: { beds: {...}, staff: {...}, appointments: {...}, alerts: {...} }
-  // Flatten it into what this UI's cards expect. Falls back to sample data if backend is unreachable.
-  const stats = rawStats?.beds
-    ? {
-        totalBeds: rawStats.beds.total,
-        occupiedBeds: rawStats.beds.occupied,
-        totalStaff: rawStats.staff?.total,
-        staffOnDuty: rawStats.staff?.onDuty,
-        totalPatients: undefined, // backend doesn't expose this yet
-        todaysAppointments: rawStats.appointments?.scheduledToday,
-      }
-    : FALLBACK_STATS;
-
-  // AI service requires a date query param — without it /predict/all-wards returns a 422 error
-  const today = new Date().toISOString().split("T")[0];
-  const { data: wardsRaw, isLive: wardsLive } = useFetch(
-    `${AI_BASE}/predict/all-wards?date=${today}`,
-    { predictions: FALLBACK_WARDS }
-  );
-
-  // AI service returns { date, predictions: [{ ward, predicted_occupancy_pct, risk_level, ... }] }
-  const wards = (wardsRaw?.predictions ?? FALLBACK_WARDS).map((w) => ({
-    ward: w.ward,
-    occupancy: w.predicted_occupancy_pct ?? w.occupancy ?? 0,
-    risk: w.risk_level ?? w.risk ?? "n/a",
-  }));
+  const wards = Array.isArray(wardsRaw) ? wardsRaw : FALLBACK_WARDS;
 
   const occupancyPct = stats?.totalBeds
     ? Math.round(((stats.occupiedBeds ?? 0) / stats.totalBeds) * 100)
@@ -147,7 +123,7 @@ export default function Dashboard() {
           <div className="ward-list">
             {wards.map((w, i) => (
               <div className="ward-row" key={w.ward ?? i}>
-                <div className="ward-name">{w.ward ?? `Ward ${i + 1}`}</div>
+                <div className="ward-name">{w.ward ?? w.name ?? `Ward ${i + 1}`}</div>
                 <div className="ward-bar-track">
                   <div
                     className="ward-bar-fill"

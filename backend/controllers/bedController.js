@@ -67,4 +67,13 @@ exports.releaseBed = async (req, res) => {
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
+  exports.createBed = async (req, res) => {
+  try {
+    const { bedNumber, ward } = req.body;
+    const bed = await Bed.create({ bedNumber, ward });
+    res.status(201).json(bed);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
 };

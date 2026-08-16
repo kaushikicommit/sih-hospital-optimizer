@@ -44,4 +44,12 @@ exports.assignStaff = async (req, res) => {
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
+  exports.createStaff = async (req, res) => {
+  try {
+    const staff = await Staff.create(req.body);
+    res.status(201).json(staff);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
 };

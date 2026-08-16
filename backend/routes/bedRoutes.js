@@ -5,10 +5,12 @@ const {
   getBedSummary,
   allocateBed,
   releaseBed,
+  createBed,
 } = require('../controllers/bedController');
 
 router.get('/', getBeds);
 router.get('/summary', getBedSummary);
+router.post('/', createBed);
 router.post('/allocate', allocateBed);
 router.post('/:id/release', releaseBed);
 
