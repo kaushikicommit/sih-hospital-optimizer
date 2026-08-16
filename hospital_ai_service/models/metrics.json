@@ -1,0 +1,16 @@
+{
+  "regression_mae_beds": 1.139,
+  "regression_r2": 0.927,
+  "classification_accuracy": 0.662,
+  "classification_f1_weighted": 0.661,
+  "feature_importance": {
+    "day_of_week": 0.027,
+    "month": 0.008,
+    "is_weekend": 0.019,
+    "is_flu_season": 0.061,
+    "is_monsoon_season": 0.023,
+    "is_holiday": 0.005,
+    "ward_encoded": 0.391,
+    "ward_capacity": 0.464
+  }
+}
