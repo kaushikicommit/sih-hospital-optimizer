@@ -1,10 +1,8 @@
 import { useEffect, useState } from "react";
 
-const API_BASE = "http://localhost:5000/api";
-const AI_BASE = "http://localhost:8000";
+const API_BASE = "http://127.0.0.1:5000/api";
+const AI_BASE = "http://127.0.0.1:8000";
 
-// Fallback data so the UI never looks broken if a service is down
-const FALLBACK_STATS = { totalBeds: 120, occupiedBeds: 87, totalStaff: 45, staffOnDuty: 31, totalPatients: 96, todaysAppointments: 18 };
 const FALLBACK_WARDS = [
   { ward: "General", occupancy: 78, risk: "moderate" },
   { ward: "ICU", occupancy: 92, risk: "high" },
@@ -64,27 +62,23 @@ function riskTone(risk) {
 export default function Dashboard() {
   const { data: rawStats, isLive: statsLive } = useFetch(`${API_BASE}/dashboard`, null);
 
-  // Backend sends a nested shape: { beds: {...}, staff: {...}, appointments: {...}, alerts: {...} }
-  // Flatten it into what this UI's cards expect. Falls back to sample data if backend is unreachable.
   const stats = rawStats?.beds
     ? {
         totalBeds: rawStats.beds.total,
         occupiedBeds: rawStats.beds.occupied,
         totalStaff: rawStats.staff?.total,
         staffOnDuty: rawStats.staff?.onDuty,
-        totalPatients: undefined, // backend doesn't expose this yet
         todaysAppointments: rawStats.appointments?.scheduledToday,
+        criticalWaiting: rawStats.alerts?.criticalPatientsWaitingForBed,
       }
-    : FALLBACK_STATS;
+    : null;
 
-  // AI service requires a date query param — without it /predict/all-wards returns a 422 error
   const today = new Date().toISOString().split("T")[0];
   const { data: wardsRaw, isLive: wardsLive } = useFetch(
     `${AI_BASE}/predict/all-wards?date=${today}`,
     { predictions: FALLBACK_WARDS }
   );
 
-  // AI service returns { date, predictions: [{ ward, predicted_occupancy_pct, risk_level, ... }] }
   const wards = (wardsRaw?.predictions ?? FALLBACK_WARDS).map((w) => ({
     ward: w.ward,
     occupancy: w.predicted_occupancy_pct ?? w.occupancy ?? 0,
@@ -130,7 +124,7 @@ export default function Dashboard() {
           tone="coral"
         />
         <StatCard label="Staff on duty" value={stats?.staffOnDuty ?? "—"} sub={`of ${stats?.totalStaff ?? "—"} total`} />
-        <StatCard label="Patients admitted" value={stats?.totalPatients ?? "—"} />
+        <StatCard label="Critical waiting" value={stats?.criticalWaiting ?? "—"} tone="amber" />
         <StatCard label="Today's appointments" value={stats?.todaysAppointments ?? "—"} tone="amber" />
       </div>
 

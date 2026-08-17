@@ -2,7 +2,7 @@
 .sidebar {
   width: 240px;
   flex-shrink: 0;
-  background: var(--teal-900);
+  background: linear-gradient(165deg, var(--teal-900), var(--teal-800));
   color: #EFF7F5;
   display: flex;
   flex-direction: column;
@@ -67,17 +67,19 @@
   padding: 10px 12px;
   border-radius: 9px;
   text-align: left;
-  transition: background 0.15s, color 0.15s;
+  transition: background 0.18s ease, color 0.18s ease, transform 0.18s ease;
 }
 
 .sidebar-nav-item:hover {
   background: rgba(255, 255, 255, 0.08);
   color: #fff;
+  transform: translateX(2px);
 }
 
 .sidebar-nav-item.active {
   background: rgba(255, 255, 255, 0.16);
   color: #fff;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
 }
 
 .sidebar-nav-icon {
@@ -106,6 +108,7 @@
   background: var(--green);
   box-shadow: 0 0 0 3px rgba(47, 145, 99, 0.2);
   flex-shrink: 0;
+  animation: pulseDot 2.4s ease-in-out infinite;
 }
 
 .sidebar-toggle {
@@ -192,6 +195,12 @@
   padding: 8px 12px;
   color: var(--ink-soft);
   width: 260px;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.topbar-search:focus-within {
+  border-color: var(--teal-700);
+  box-shadow: 0 0 0 3px rgba(18, 113, 106, 0.1);
 }
 
 .topbar-search input {
@@ -208,7 +217,7 @@
   width: 38px;
   height: 38px;
   border-radius: 50%;
-  background: var(--teal-100);
+  background: linear-gradient(135deg, var(--teal-100), #DCEEEA);
   color: var(--teal-900);
   display: flex;
   align-items: center;
@@ -217,6 +226,7 @@
   font-weight: 600;
   font-size: 15px;
   flex-shrink: 0;
+  box-shadow: inset 0 0 0 1px rgba(14, 92, 86, 0.08);
 }
 
 @media (max-width: 900px) {
@@ -242,7 +252,7 @@
 
 .dashboard-title {
   font-family: var(--font-display);
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 600;
   color: var(--ink);
   margin-bottom: 4px;
@@ -264,16 +274,19 @@
   background: var(--green-soft);
   color: var(--green);
   white-space: nowrap;
+  box-shadow: inset 0 0 0 1px rgba(47, 145, 99, 0.12);
 }
 
 .live-pill.off {
   background: var(--amber-soft);
   color: var(--amber);
+  box-shadow: inset 0 0 0 1px rgba(198, 138, 46, 0.14);
 }
 
 .live-pill.off .status-dot {
   background: var(--amber);
   box-shadow: 0 0 0 3px rgba(198, 138, 46, 0.2);
+  animation: none;
 }
 
 .live-pill.small {
@@ -304,18 +317,45 @@
   border-radius: var(--radius);
   padding: 18px 18px 16px;
   box-shadow: var(--shadow);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  animation: fadeUp 0.45s ease backwards;
 }
+
+.stat-card::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, var(--teal-700), var(--teal-100));
+  opacity: 0.8;
+}
+
+.stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-hover);
+}
+
+.stat-card:nth-child(1) { animation-delay: 0.02s; }
+.stat-card:nth-child(2) { animation-delay: 0.08s; }
+.stat-card:nth-child(3) { animation-delay: 0.14s; }
+.stat-card:nth-child(4) { animation-delay: 0.2s; }
+.stat-card:nth-child(5) { animation-delay: 0.26s; }
 
 .stat-label {
   font-size: 12px;
   color: var(--ink-soft);
   font-weight: 500;
   margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
 }
 
 .stat-value {
   font-family: var(--font-mono);
-  font-size: 28px;
+  font-size: 30px;
   font-weight: 600;
   color: var(--teal-900);
   line-height: 1;
@@ -356,6 +396,7 @@
   border-radius: var(--radius);
   padding: 20px 22px 22px;
   box-shadow: var(--shadow);
+  animation: fadeUp 0.5s ease 0.15s backwards;
 }
 
 .panel-header {
@@ -383,6 +424,13 @@
   grid-template-columns: 100px 1fr 44px 76px;
   align-items: center;
   gap: 14px;
+  padding: 8px 6px;
+  border-radius: 8px;
+  transition: background 0.15s ease;
+}
+
+.ward-row:hover {
+  background: var(--teal-100);
 }
 
 .ward-name {
@@ -400,8 +448,9 @@
 
 .ward-bar-fill {
   height: 100%;
-  background: var(--teal-700);
+  background: linear-gradient(90deg, var(--teal-700), var(--teal-900));
   border-radius: 100px;
+  transition: width 0.6s ease;
 }
 
 .ward-occupancy {
@@ -447,9 +496,10 @@
   font-size: 13.5px;
   font-weight: 600;
   text-align: left;
-  transition: background 0.15s;
+  transition: background 0.15s ease, transform 0.15s ease;
 }
 
 .quick-action:hover {
   background: #DCEEEA;
+  transform: translateX(2px);
 }

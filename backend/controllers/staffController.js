@@ -25,7 +25,6 @@ exports.getStaffSummary = async (req, res) => {
 exports.assignStaff = async (req, res) => {
   try {
     const { department, role } = req.body;
-
     const staff = await Staff.findOne({
       department,
       role,
@@ -44,12 +43,14 @@ exports.assignStaff = async (req, res) => {
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
-  exports.createStaff = async (req, res) => {
+};
+
+// POST naya staff member create karo
+exports.createStaff = async (req, res) => {
   try {
     const staff = await Staff.create(req.body);
     res.status(201).json(staff);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
-};
 };

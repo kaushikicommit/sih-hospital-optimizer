@@ -27,10 +27,8 @@ exports.allocateBed = async (req, res) => {
     const patient = await Patient.findById(patientId);
     if (!patient) return res.status(404).json({ message: 'Patient not found' });
 
-    // Pehle requested ward mein available bed dhoondo
     let bed = await Bed.findOne({ ward, status: 'available' }).sort({ createdAt: 1 });
 
-    // Agar ward full hai aur patient critical/high priority hai, toh ICU/Emergency mein dhoondo
     if (!bed && (patient.priority === 'critical' || patient.priority === 'high')) {
       bed = await Bed.findOne({
         ward: { $in: ['ICU', 'Emergency'] },
@@ -59,7 +57,7 @@ exports.releaseBed = async (req, res) => {
     const bed = await Bed.findById(req.params.id);
     if (!bed) return res.status(404).json({ message: 'Bed not found' });
 
-    bed.status = 'cleaning'; // discharge ke baad cleaning status mein jaata hai
+    bed.status = 'cleaning';
     bed.patientId = null;
     await bed.save();
 
@@ -67,7 +65,10 @@ exports.releaseBed = async (req, res) => {
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
-  exports.createBed = async (req, res) => {
+};
+
+// POST naya bed create karo
+exports.createBed = async (req, res) => {
   try {
     const { bedNumber, ward } = req.body;
     const bed = await Bed.create({ bedNumber, ward });
@@ -75,5 +76,4 @@ exports.releaseBed = async (req, res) => {
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
-};
 };

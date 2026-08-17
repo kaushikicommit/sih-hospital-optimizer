@@ -68,7 +68,7 @@ export default function Sidebar() {
         <div className="sidebar-brand">
           <span className="sidebar-brand-mark">+</span>
           <div>
-            <div className="sidebar-brand-name">HospiSync</div>
+            <div className="sidebar-brand-name">ForeCare</div>
             <div className="sidebar-brand-sub">Resource Optimizer</div>
           </div>
         </div>
