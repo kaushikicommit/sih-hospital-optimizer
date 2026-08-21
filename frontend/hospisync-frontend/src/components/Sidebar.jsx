@@ -2,21 +2,77 @@ import { NavLink } from "react-router-dom";
 import { useState } from "react";
 
 const NAV = [
-  { path: "/", label: "Dashboard", icon: "grid" },
-  { path: "/beds", label: "Beds", icon: "bed" },
-  { path: "/patients", label: "Patients", icon: "user" },
-  { path: "/staff", label: "Staff", icon: "users" },
-  { path: "/appointments", label: "Appointments", icon: "calendar" },
-  { path: "/predictions", label: "AI Predictions", icon: "pulse" },
+  {
+    path: "/dashboard",
+    label: "Dashboard",
+    icon: "grid",
+  },
+  {
+    path: "/beds",
+    label: "Beds",
+    icon: "bed",
+  },
+  {
+    path: "/patients",
+    label: "Patients",
+    icon: "user",
+  },
+  {
+    path: "/staff",
+    label: "Staff",
+    icon: "users",
+  },
+  {
+    path: "/appointments",
+    label: "Appointments",
+    icon: "calendar",
+  },
+  {
+    path: "/predictions",
+    label: "AI Predictions",
+    icon: "pulse",
+  },
 ];
 
 const ICONS = {
   grid: (
     <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-      <rect x="2" y="2" width="6" height="6" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
-      <rect x="10" y="2" width="6" height="6" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
-      <rect x="2" y="10" width="6" height="6" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
-      <rect x="10" y="10" width="6" height="6" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
+      <rect
+        x="2"
+        y="2"
+        width="6"
+        height="6"
+        rx="1.5"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      />
+      <rect
+        x="10"
+        y="2"
+        width="6"
+        height="6"
+        rx="1.5"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      />
+      <rect
+        x="2"
+        y="10"
+        width="6"
+        height="6"
+        rx="1.5"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      />
+      <rect
+        x="10"
+        y="10"
+        width="6"
+        height="6"
+        rx="1.5"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      />
     </svg>
   ),
 
@@ -130,12 +186,18 @@ export default function Sidebar() {
 
   return (
     <>
+      {/* Mobile menu button */}
       <button
         className="sidebar-toggle"
-        onClick={() => setOpen(!open)}
+        onClick={() => setOpen((prev) => !prev)}
         aria-label="Toggle menu"
       >
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 20 20"
+          fill="none"
+        >
           <path
             d="M3 6h14M3 10h14M3 14h14"
             stroke="currentColor"
@@ -145,27 +207,39 @@ export default function Sidebar() {
         </svg>
       </button>
 
-      <aside className={`sidebar ${open ? "sidebar-open" : ""}`}>
-
+      {/* Sidebar */}
+      <aside
+        className={`sidebar ${
+          open ? "sidebar-open" : ""
+        }`}
+      >
+        {/* Brand */}
         <div className="sidebar-brand">
-          <span className="sidebar-brand-mark">+</span>
+          <span className="sidebar-brand-mark">
+            +
+          </span>
 
           <div>
-            <div className="sidebar-brand-name">ForeCare</div>
+            <div className="sidebar-brand-name">
+              ForeCare
+            </div>
+
             <div className="sidebar-brand-sub">
               Resource Optimizer
             </div>
           </div>
         </div>
 
+        {/* Navigation */}
         <nav className="sidebar-nav">
           {NAV.map((item) => (
             <NavLink
               key={item.path}
               to={item.path}
-              end={item.path === "/"}
               className={({ isActive }) =>
-                `sidebar-nav-item ${isActive ? "active" : ""}`
+                `sidebar-nav-item ${
+                  isActive ? "active" : ""
+                }`
               }
               onClick={() => setOpen(false)}
             >
@@ -173,20 +247,21 @@ export default function Sidebar() {
                 {ICONS[item.icon]}
               </span>
 
-              {item.label}
+              <span>{item.label}</span>
             </NavLink>
           ))}
         </nav>
 
+        {/* Footer */}
         <div className="sidebar-footer">
           <div className="sidebar-status">
             <span className="status-dot" />
             Systems live
           </div>
         </div>
-
       </aside>
 
+      {/* Mobile overlay */}
       {open && (
         <div
           className="sidebar-scrim"

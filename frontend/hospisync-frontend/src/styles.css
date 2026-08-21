@@ -973,3 +973,140 @@ textarea {
     flex-wrap: wrap;
   }
 }
+/* =========================================================
+   PATIENT PORTAL
+   ========================================================= */
+
+.patient-portal {
+  width: 100%;
+  max-width: 1250px;
+  margin: 0 auto;
+}
+
+.patient-portal-header {
+  margin-bottom: 28px;
+}
+
+.patient-search-card {
+  max-width: 1100px;
+}
+
+.patient-search-form {
+  display: flex;
+  gap: 14px;
+  align-items: stretch;
+  margin-top: 22px;
+}
+
+.patient-search-form input {
+  flex: 1;
+  min-width: 0;
+  height: 52px;
+  padding: 0 16px;
+
+  border: 1px solid var(--border);
+  border-radius: 10px;
+
+  background: #ffffff;
+  color: var(--ink);
+
+  outline: none;
+}
+
+.patient-search-form input:focus {
+  border-color: var(--teal-700);
+  box-shadow: 0 0 0 3px rgba(19, 122, 114, 0.08);
+}
+
+.patient-search-form .auth-submit {
+  width: 150px;
+  margin: 0;
+}
+
+.patient-search-message {
+  margin-top: 18px;
+  color: var(--coral);
+  font-weight: 600;
+}
+
+.patient-result {
+  margin-top: 30px;
+  padding: 26px;
+
+  border: 1px solid var(--border);
+  border-radius: 14px;
+
+  background: #ffffff;
+  box-shadow: var(--shadow);
+}
+
+.patient-result-header {
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.patient-result-label {
+  display: block;
+  margin-bottom: 5px;
+
+  color: var(--ink-soft);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.patient-result-header h2 {
+  margin: 0;
+
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 28px;
+}
+
+.patient-info-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+
+  margin-top: 22px;
+}
+
+.patient-info-item {
+  padding: 18px;
+
+  border-radius: 10px;
+  background: #f5faf8;
+}
+
+.patient-info-item span {
+  display: block;
+  margin-bottom: 7px;
+
+  color: var(--ink-soft);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.patient-info-item strong {
+  color: var(--ink);
+  font-size: 16px;
+}
+
+.auth-role-field select {
+  width: 100%;
+}
+
+@media (max-width: 760px) {
+  .patient-search-form {
+    flex-direction: column;
+  }
+
+  .patient-search-form .auth-submit {
+    width: 100%;
+  }
+
+  .patient-info-grid {
+    grid-template-columns: 1fr;
+  }
+}

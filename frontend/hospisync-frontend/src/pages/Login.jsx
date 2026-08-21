@@ -9,6 +9,7 @@ export default function Login() {
   const [form, setForm] = useState({
     email: "",
     password: "",
+    role: "staff",
   });
 
   const [message, setMessage] = useState("");
@@ -39,36 +40,114 @@ export default function Login() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || "Login failed");
+        throw new Error(
+          data.message || "Invalid email or password"
+        );
       }
 
-      setMessage("Login successful!");
+      /* ----------------------------------------
+         SAVE TOKEN
+         ---------------------------------------- */
 
-      // If backend returns token, store it
       if (data.token) {
         localStorage.setItem("token", data.token);
       }
 
-      // Go to dashboard after successful login
-      setTimeout(() => {
-        navigate("/dashboard");
-      }, 500);
+
+      /* ----------------------------------------
+         SAVE USER
+         ---------------------------------------- */
+
+      if (data.user) {
+        localStorage.setItem(
+          "user",
+          JSON.stringify(data.user)
+        );
+      }
+
+
+      /* ----------------------------------------
+         GET ROLE FROM BACKEND
+         ---------------------------------------- */
+
+      const backendRole =
+        data.user?.role ||
+        data.role ||
+        form.role;
+
+
+      /* ----------------------------------------
+         CHECK ROLE
+         ---------------------------------------- */
+
+      if (
+        backendRole &&
+        form.role &&
+        backendRole.toLowerCase() !==
+          form.role.toLowerCase()
+      ) {
+        throw new Error(
+          `This account is registered as ${backendRole}, not ${form.role}.`
+        );
+      }
+
+
+      /* ----------------------------------------
+         LOGIN SUCCESS
+         ---------------------------------------- */
+
+      setMessage("Login successful!");
+
+
+      /* ----------------------------------------
+         STAFF → STAFF DASHBOARD
+         ---------------------------------------- */
+
+      if (form.role === "staff") {
+        setTimeout(() => {
+          navigate("/dashboard");
+        }, 400);
+
+        return;
+      }
+
+
+      /* ----------------------------------------
+         PATIENT → PATIENT PORTAL
+         ---------------------------------------- */
+
+      if (form.role === "patient") {
+        setTimeout(() => {
+          navigate("/patient-portal");
+        }, 400);
+
+        return;
+      }
 
     } catch (error) {
-      setMessage(error.message || "Something went wrong");
+      setMessage(
+        error.message || "Something went wrong"
+      );
     } finally {
       setLoading(false);
     }
   };
 
+
   return (
     <div className="auth-page">
 
-      {/* Header */}
+      {/* ========================================
+          HEADER
+          ======================================== */}
+
       <div className="auth-page-header">
 
         <div className="auth-brand">
-          <div className="auth-brand-mark">+</div>
+
+          <div className="auth-brand-mark">
+            +
+          </div>
 
           <div>
             <div className="auth-brand-name">
@@ -79,26 +158,37 @@ export default function Login() {
               Resource Optimizer
             </div>
           </div>
+
         </div>
 
-        <h1>Staff Login</h1>
+
+        <h1>
+          Staff & Patient Login
+        </h1>
 
         <p>
-          Sign in to access the ForeCare staff dashboard.
+          Sign in to access the ForeCare platform.
         </p>
 
       </div>
 
 
-      {/* Login Card */}
+      {/* ========================================
+          LOGIN CARD
+          ======================================== */}
+
       <section className="auth-card">
 
         <div className="auth-card-header">
-          <h2>Welcome back</h2>
+
+          <h2>
+            Welcome back
+          </h2>
 
           <p>
-            Enter your staff credentials to continue.
+            Enter your credentials to continue.
           </p>
+
         </div>
 
 
@@ -106,8 +196,43 @@ export default function Login() {
 
           <div className="auth-form-grid">
 
-            {/* Email */}
+            {/* ====================================
+                ROLE
+                ==================================== */}
+
             <div className="auth-field">
+
+              <label htmlFor="role">
+                Login as
+              </label>
+
+              <select
+                id="role"
+                name="role"
+                value={form.role}
+                onChange={handleChange}
+                required
+              >
+
+                <option value="staff">
+                  Staff
+                </option>
+
+                <option value="patient">
+                  Patient
+                </option>
+
+              </select>
+
+            </div>
+
+
+            {/* ====================================
+                EMAIL
+                ==================================== */}
+
+            <div className="auth-field">
+
               <label htmlFor="email">
                 Email
               </label>
@@ -116,16 +241,25 @@ export default function Login() {
                 id="email"
                 type="email"
                 name="email"
-                placeholder="staff@hospital.com"
+                placeholder={
+                  form.role === "patient"
+                    ? "patient@hospital.com"
+                    : "staff@hospital.com"
+                }
                 value={form.email}
                 onChange={handleChange}
                 required
               />
+
             </div>
 
 
-            {/* Password */}
+            {/* ====================================
+                PASSWORD
+                ==================================== */}
+
             <div className="auth-field">
+
               <label htmlFor="password">
                 Password
               </label>
@@ -139,26 +273,39 @@ export default function Login() {
                 onChange={handleChange}
                 required
               />
+
             </div>
 
           </div>
 
 
-          {/* Login Button */}
+          {/* ======================================
+              LOGIN BUTTON
+              ====================================== */}
+
           <button
             type="submit"
             className="auth-submit"
             disabled={loading}
           >
-            {loading ? "Logging in..." : "Login"}
+
+            {loading
+              ? "Signing in..."
+              : "Login"}
+
           </button>
 
 
-          {/* Message */}
+          {/* ======================================
+              MESSAGE
+              ====================================== */}
+
           {message && (
             <p
               className={`auth-message ${
-                message.toLowerCase().includes("success")
+                message
+                  .toLowerCase()
+                  .includes("successful")
                   ? "auth-message-success"
                   : "auth-message-error"
               }`}
@@ -170,13 +317,20 @@ export default function Login() {
         </form>
 
 
-        {/* Register Link */}
+        {/* ========================================
+            REGISTER LINK
+            ======================================== */}
+
         <div className="auth-footer">
-          <span>New staff member?</span>
+
+          <span>
+            New staff member?
+          </span>
 
           <Link to="/register">
             Register here
           </Link>
+
         </div>
 
       </section>
