@@ -1,56 +1,61 @@
 const Staff = require('../models/Staff');
 
-// GET saare staff dikhao
-exports.getStaff = async (req, res) => {
-  const staff = await Staff.find();
-  res.json(staff);
-};
+// @desc    Admin assigns/changes a staff member's shift
+// @route   PATCH /api/staff/:id/shift
+// @access  Protected (any authenticated staff, for now)
+exports.updateStaffShift = async (req, res) => {
+  const { shift } = req.body;
+  const validShifts = ['Morning', 'Evening', 'Night'];
 
-// GET staff workload summary, department-wise
-exports.getStaffSummary = async (req, res) => {
-  const summary = await Staff.aggregate([
-    { $match: { status: 'on-duty' } },
-    {
-      $group: {
-        _id: '$department',
-        avgLoad: { $avg: '$currentLoad' },
-        staffCount: { $sum: 1 },
-      },
-    },
-  ]);
-  res.json(summary);
-};
+  if (!shift || !validShifts.includes(shift)) {
+    return res.status(400).json({
+      message: `shift must be one of: ${validShifts.join(', ')}`,
+    });
+  }
 
-// POST patient ko sabse kam-loaded available staff ko assign karo
-exports.assignStaff = async (req, res) => {
   try {
-    const { department, role } = req.body;
-    const staff = await Staff.findOne({
-      department,
-      role,
-      status: 'on-duty',
-      $expr: { $lt: ['$currentLoad', '$maxLoad'] },
-    }).sort({ currentLoad: 1 });
+    const staff = await Staff.findById(req.params.id);
 
     if (!staff) {
-      return res.status(409).json({ message: 'No available staff with capacity in this department' });
+      return res.status(404).json({ message: 'Staff member not found' });
     }
 
-    staff.currentLoad += 1;
+    staff.shift = shift;
     await staff.save();
 
-    res.json({ message: 'Staff assigned', staff });
+    const { password, ...staffData } = staff.toObject();
+    res.json(staffData);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ message: 'Server error updating shift' });
   }
 };
 
-// POST naya staff member create karo
-exports.createStaff = async (req, res) => {
+// @desc    Staff updates their own on-duty/off-duty status
+// @route   PATCH /api/staff/me/status
+// @access  Protected (self only, derived from JWT)
+exports.updateOwnStatus = async (req, res) => {
+  const { status } = req.body;
+  const validStatuses = ['on-duty', 'off-duty', 'on-break'];
+
+  if (!status || !validStatuses.includes(status)) {
+    return res.status(400).json({
+      message: `status must be one of: ${validStatuses.join(', ')}`,
+    });
+  }
+
   try {
-    const staff = await Staff.create(req.body);
-    res.status(201).json(staff);
+    const staff = await Staff.findById(req.staffId);
+
+    if (!staff) {
+      return res.status(404).json({ message: 'Staff member not found' });
+    }
+
+    staff.status = status;
+    await staff.save();
+
+    const { password, ...staffData } = staff.toObject();
+    res.json(staffData);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ message: 'Server error updating status' });
   }
 };
