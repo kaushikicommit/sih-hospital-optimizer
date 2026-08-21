@@ -81,6 +81,78 @@ allocation logic. Suggested flow for the rest of the team:
    simple bar/gauge, color-coded by `risk_level` — this is the visual
    that sells "intelligent" to judges.
 
+## Feature: Doctor availability ("busy — free by X PM")
+
+Lets patient and staff/admin pages check if a doctor is free right now,
+or if busy, get an estimated free-by time — based on their live
+appointment queue in MongoDB and a duration-prediction model.
+
+### Setup
+
+```bash
+python generate_consultation_data.py   # simulated consultation duration history
+python train_duration_model.py         # trains the duration-prediction model
+
+export MONGO_URI="mongodb://localhost:27017"
+python seed_mongo.py                   # populates doctors + live appointment queue
+```
+
+`test_availability.py` verifies the logic works with a fake in-memory
+MongoDB (mongomock) — run `python test_availability.py` any time to
+sanity-check the estimation logic without touching a real database.
+
+### API
+
+```
+GET /doctor-availability?doctor_id=D001
+```
+
+Response when busy:
+```json
+{
+  "doctor_id": "D001",
+  "doctor_name": "Dr. Sharma",
+  "status": "busy",
+  "free_by": "02:45 PM",
+  "queue_length": 2,
+  "estimated_wait_minutes": 38
+}
+```
+
+Response when free:
+```json
+{
+  "doctor_id": "D001",
+  "doctor_name": "Dr. Sharma",
+  "status": "free",
+  "free_by": "01:10 PM",
+  "queue_length": 0
+}
+```
+
+```
+GET /doctors
+```
+Lists all doctors — use this to populate a dropdown on the frontend.
+
+### Frontend
+
+`DoctorAvailability.jsx` is a ready-to-use React component with a
+"Check doctor availability" button. Drop it into both your patient page
+and your admin/staff page:
+
+```jsx
+<DoctorAvailability doctorId="D001" />
+```
+
+### How it estimates the free-by time
+
+1. Looks up the doctor's currently in-progress appointment
+2. Predicts how many more minutes it will take (regression model, trained
+   on appointment type / patient age group / first-visit flag)
+3. Adds up predicted durations for everyone waiting in queue ahead
+4. Returns the resulting free-by time
+
 ## Improving this if you have time
 
 - Swap `RandomForest*` for `GradientBoosting*` or `xgboost` if you want to

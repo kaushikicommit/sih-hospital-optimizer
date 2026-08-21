@@ -22,11 +22,16 @@ Docs auto-generated at: http://localhost:8000/docs
 from datetime import datetime
 from typing import Optional
 
+import os
+
 import joblib
 import pandas as pd
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from pymongo import MongoClient
+
+from availability_service import load_duration_model, estimate_doctor_free_time
 
 app = FastAPI(
     title="Hospital Resource Optimization - Prediction Service",
@@ -70,6 +75,15 @@ FEATURE_COLS = [
     "day_of_week", "month", "is_weekend", "is_flu_season",
     "is_monsoon_season", "is_holiday", "ward_encoded", "ward_capacity",
 ]
+
+# ---------------------------------------------------------------------------
+# Doctor-availability: connects to MongoDB + the consultation-duration model
+# ---------------------------------------------------------------------------
+duration_model, duration_encoders = load_duration_model()
+
+MONGO_URI = os.environ.get("MONGO_URI", "mongodb://localhost:27017")
+mongo_client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=3000)
+mongo_db = mongo_client["hospital_resource_system"]
 
 
 class PredictionResponse(BaseModel):
@@ -169,6 +183,36 @@ def predict_all_wards(date: str = Query(..., description="Target date, format YY
             "recommended_action": recommend_action(risk_level, ward),
         })
     return {"date": date, "predictions": results}
+
+
+@app.get("/doctor-availability")
+def doctor_availability(
+    doctor_id: str = Query(..., description="Doctor ID, e.g. D001"),
+):
+    """
+    Checks MongoDB for the doctor's current appointment + waiting queue,
+    and returns whether they're free now, or when they will be free.
+    Used by both the patient-facing and admin/staff-facing pages.
+    """
+    try:
+        result = estimate_doctor_free_time(mongo_db, doctor_id, duration_model, duration_encoders)
+    except Exception as e:
+        raise HTTPException(status_code=503, detail=f"Could not reach MongoDB or compute estimate: {e}")
+
+    if "error" in result:
+        raise HTTPException(status_code=404, detail=result["error"])
+
+    return result
+
+
+@app.get("/doctors")
+def list_doctors():
+    """Lists all doctors -- handy for populating a dropdown on the frontend."""
+    try:
+        doctors = list(mongo_db.doctors.find({}, {"_id": 0}))
+    except Exception as e:
+        raise HTTPException(status_code=503, detail=f"Could not reach MongoDB: {e}")
+    return {"doctors": doctors}
 
 
 if __name__ == "__main__":
