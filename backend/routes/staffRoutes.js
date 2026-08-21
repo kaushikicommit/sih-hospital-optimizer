@@ -1,10 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const { getStaff, getStaffSummary, assignStaff, createStaff } = require('../controllers/staffController');
+const protect = require('../middleware/authMiddleware');
+const { updateStaffShift, updateOwnStatus } = require('../controllers/staffController');
 
-router.get('/', getStaff);
-router.get('/summary', getStaffSummary);
-router.post('/', createStaff);
-router.post('/assign', assignStaff);
+router.patch('/:id/shift', protect, updateStaffShift);
+router.patch('/me/status', protect, updateOwnStatus);
 
 module.exports = router;
